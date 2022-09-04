@@ -48,6 +48,7 @@ class TorchPushPolicyExpert(TorchBasePolicy):
 
     def __init__(self, action_space, observation_space, episode_length):
         self.policy = Policy_(observation_space.shape[0], action_space.shape[0])
+        self.policy.to(self.device)
         self.policy.load_state_dict(torch.load(os.path.dirname(os.path.abspath(__file__))+"/policies/trifinger-cube-push-real-expert-v0True-200.pt")["policy"])
         super().__init__(self.policy, action_space, observation_space, episode_length)
 
@@ -59,6 +60,7 @@ class TorchPushPolicyMixed(TorchBasePolicy):
 
     def __init__(self, action_space, observation_space, episode_length):
         self.policy = Policy_(observation_space.shape[0], action_space.shape[0])
+        self.policy.to(self.device)
         self.policy.load_state_dict(torch.load(os.path.dirname(os.path.abspath(__file__))+"/policies/trifinger-cube-push-real-mixed-v0True-200.pt")["policy"])
         super().__init__(self.policy, action_space, observation_space, episode_length)
 
