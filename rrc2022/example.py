@@ -5,23 +5,25 @@ import torch
 from rrc_2022_datasets import PolicyBase
 
 from . import policies
-
-
+import torch
+import torch.nn as nn
+import os
 class TorchBasePolicy(PolicyBase):
     def __init__(
         self,
-        torch_model_path,
+        torch_model,
         action_space,
         observation_space,
         episode_length,
     ):
         self.action_space = action_space
         self.device = "cpu"
+        self.policy = torch_model
+        self.policy.eval()
 
         # load torch script
-        self.policy = torch.jit.load(
-            torch_model_path, map_location=torch.device(self.device)
-        )
+        self.action_space = action_space
+        self.action_max = self.action_space.high[0]
 
     @staticmethod
     def is_using_flattened_observations():
@@ -34,27 +36,84 @@ class TorchBasePolicy(PolicyBase):
         observation = torch.tensor(observation, dtype=torch.float, device=self.device)
         action = self.policy(observation.unsqueeze(0))
         action = action.detach().numpy()[0]
-        action = np.clip(action, self.action_space.low, self.action_space.high)
+        action *= self.action_max
         return action
 
 
-class TorchPushPolicy(TorchBasePolicy):
+class TorchPushPolicyExpert(TorchBasePolicy):
     """Example policy for the push task, using a torch model to provide actions.
 
     Expects flattened observations.
     """
 
     def __init__(self, action_space, observation_space, episode_length):
-        model = policies.get_model_path("push.pt")
-        super().__init__(model, action_space, observation_space, episode_length)
+        self.policy = BC_agent(observation_space.shape[0], action_space.shape[0])
+        self.policy.load_state_dict(torch.load(os.path.dirname(os.path.abspath(__file__))+"/policies/trifinger-cube-push-real-expert-v0True-200.pt")["policy"])
+        super().__init__(self.policy, action_space, observation_space, episode_length)
+
+class TorchPushPolicyMixed(TorchBasePolicy):
+    """Example policy for the push task, using a torch model to provide actions.
+
+    Expects flattened observations.
+    """
+
+    def __init__(self, action_space, observation_space, episode_length):
+        self.policy = BC_agent(observation_space.shape[0], action_space.shape[0])
+        self.policy.load_state_dict(torch.load(os.path.dirname(os.path.abspath(__file__))+"/policies/trifinger-cube-push-real-mixed-v0True-200.pt")["policy"])
+        super().__init__(self.policy, action_space, observation_space, episode_length)
 
 
-class TorchLiftPolicy(TorchBasePolicy):
+class TorchLiftPolicyExpert(TorchBasePolicy):
     """Example policy for the lift task, using a torch model to provide actions.
 
     Expects flattened observations.
     """
 
     def __init__(self, action_space, observation_space, episode_length):
-        model = policies.get_model_path("lift.pt")
-        super().__init__(model, action_space, observation_space, episode_length)
+        self.policy = BC_agent(observation_space.shape[0], action_space.shape[0])
+        self.policy.load_state_dict(torch.load(os.path.dirname(os.path.abspath(__file__))+"/policies/trifinger-cube-lift-real-expert-v0True-300.pt")["policy"])
+        super().__init__(self.policy, action_space, observation_space, episode_length)
+
+class TorchLiftPolicyMixed(TorchBasePolicy):
+    """Example policy for the lift task, using a torch model to provide actions.
+
+    Expects flattened observations.
+    """
+
+    def __init__(self, action_space, observation_space, episode_length):
+        self.policy = BC_agent(observation_space.shape[0], action_space.shape[0])
+        self.policy.load_state_dict(torch.load(os.path.dirname(os.path.abspath(__file__))+"/policies/trifinger-cube-lift-real-mixed-v0True-200.pt")["policy"])
+        super().__init__(self.policy, action_space, observation_space, episode_length)
+
+
+
+class BC_agent:
+    def __init__(self,o_dim,a_dim):
+        self.o_dim, self.a_dim = o_dim, a_dim
+        self.pi = Policy_(o_dim,a_dim)
+
+
+    def init_pi(self,task_name,iter,path):
+        path = path + '/' + task_name + '-' + str(iter) + '.pt'
+        self.pi.load_state_dict(torch.load(path)['policy'])
+
+    def forward(self,o_input):
+        return self.pi(o_input)
+
+class Policy_(nn.Module):
+    def __init__(self, o_dim, a_dim, h_size = 256):
+        super(Policy_, self).__init__()
+        self.net = nn.Sequential(
+            nn.Linear(o_dim, 512),
+            nn.ReLU(),
+            nn.Linear(512, 512),
+            nn.ReLU(),
+            nn.Linear(512, 256),
+            nn.ReLU(),
+            nn.Linear(256, 256),
+            nn.ReLU(),
+            nn.Linear(256, a_dim),
+            nn.Tanh()
+        )
+    def forward(self,o_input:torch.Tensor,repeat=None):
+        return self.net(o_input)
