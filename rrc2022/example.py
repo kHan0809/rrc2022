@@ -49,7 +49,7 @@ class TorchPushPolicyExpert(TorchBasePolicy):
     def __init__(self, action_space, observation_space, episode_length):
         self.policy = Policy_(observation_space.shape[0], action_space.shape[0])
         self.policy.to(self.device)
-        self.policy.load_state_dict(torch.load(os.path.dirname(os.path.abspath(__file__))+"/policies/trifinger-cube-push-real-expert-v0True-200.pt")["policy"])
+        self.policy.load_state_dict(torch.load(os.path.dirname(os.path.abspath(__file__))+"/policies/trifinger-cube-push-real-expert-v0True-200.pt",map_location=torch.device('cpu'))["policy"])
         super().__init__(self.policy, action_space, observation_space, episode_length)
 
 class TorchPushPolicyMixed(TorchBasePolicy):
@@ -61,7 +61,7 @@ class TorchPushPolicyMixed(TorchBasePolicy):
     def __init__(self, action_space, observation_space, episode_length):
         self.policy = Policy_(observation_space.shape[0], action_space.shape[0])
         self.policy.to(self.device)
-        self.policy.load_state_dict(torch.load(os.path.dirname(os.path.abspath(__file__))+"/policies/trifinger-cube-push-real-mixed-v0True-200.pt")["policy"])
+        self.policy.load_state_dict(torch.load(os.path.dirname(os.path.abspath(__file__))+"/policies/trifinger-cube-push-real-mixed-v0True-200.pt",map_location=torch.device('cpu'))["policy"])
         super().__init__(self.policy, action_space, observation_space, episode_length)
 
 
@@ -73,7 +73,7 @@ class TorchLiftPolicyExpert(TorchBasePolicy):
 
     def __init__(self, action_space, observation_space, episode_length):
         self.policy = Policy_(observation_space.shape[0], action_space.shape[0])
-        self.policy.load_state_dict(torch.load(os.path.dirname(os.path.abspath(__file__))+"/policies/trifinger-cube-lift-real-expert-v0True-300.pt")["policy"])
+        self.policy.load_state_dict(torch.load(os.path.dirname(os.path.abspath(__file__))+"/policies/trifinger-cube-lift-real-expert-v0True-200.pt",map_location=torch.device('cpu'))["policy"])
         super().__init__(self.policy, action_space, observation_space, episode_length)
 
 class TorchLiftPolicyMixed(TorchBasePolicy):
@@ -84,7 +84,7 @@ class TorchLiftPolicyMixed(TorchBasePolicy):
 
     def __init__(self, action_space, observation_space, episode_length):
         self.policy = Policy_(observation_space.shape[0], action_space.shape[0])
-        self.policy.load_state_dict(torch.load(os.path.dirname(os.path.abspath(__file__))+"/policies/trifinger-cube-lift-real-mixed-v0True-200.pt")["policy"])
+        self.policy.load_state_dict(torch.load(os.path.dirname(os.path.abspath(__file__))+"/policies/trifinger-cube-lift-real-mixed-v0True-200.pt",map_location=torch.device('cpu'))["policy"])
         super().__init__(self.policy, action_space, observation_space, episode_length)
 
 
@@ -104,5 +104,5 @@ class Policy_(nn.Module):
             nn.Linear(256, a_dim),
             nn.Tanh()
         )
-    def forward(self,o_input:torch.Tensor):
+    def forward(self,o_input):
         return self.net(o_input)
