@@ -35,7 +35,6 @@ class TorchBasePolicy(PolicyBase):
     def get_action(self, observation):
         observation = torch.tensor(observation, dtype=torch.float, device=self.device)
         action = self.policy(observation.unsqueeze(0))
-        print(action)
         action = action.detach().numpy()[0]
         action *= self.action_max
         return action
