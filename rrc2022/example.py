@@ -37,7 +37,6 @@ class TorchBasePolicy(PolicyBase):
         action = self.policy(observation.unsqueeze(0))
         action = action.detach().numpy()[0]
         action *= self.action_max
-        print(action)
         return action
 
 
@@ -60,7 +59,7 @@ class TorchPushPolicyMixed(TorchBasePolicy):
 
     def __init__(self, action_space, observation_space, episode_length):
         self.policy = Policy_(observation_space.shape[0], action_space.shape[0])
-        self.policy.load_state_dict(torch.load(os.path.dirname(os.path.abspath(__file__))+"/policies/trifinger-cube-push-real-mixed-v0True-670.pt",map_location=torch.device('cpu'))["policy"])
+        self.policy.load_state_dict(torch.load(os.path.dirname(os.path.abspath(__file__))+"/policies/trifinger-cube-push-real-mixed-v0True-180.pt",map_location=torch.device('cpu'))["policy"])
         super().__init__(self.policy, action_space, observation_space, episode_length)
 
 
