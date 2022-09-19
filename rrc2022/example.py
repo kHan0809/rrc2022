@@ -37,6 +37,7 @@ class TorchBasePolicy(PolicyBase):
         action = self.policy(observation.unsqueeze(0))
         action = action.detach().numpy()[0]
         action *= self.action_max
+        print(action)
         return action
 
 
