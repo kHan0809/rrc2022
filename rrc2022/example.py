@@ -89,13 +89,12 @@ class Policy_(nn.Module):
     def __init__(self, o_dim, a_dim):
         super(Policy_, self).__init__()
         self.net = nn.Sequential(
-            nn.Linear(o_dim, 256),
+            nn.Linear(o_dim, 512),
             nn.ReLU(),
-            nn.Linear(256, 512),
+            nn.Linear(512, 512),
             nn.ReLU(),
             nn.Linear(512, a_dim),
             nn.Tanh()
         )
     def forward(self,o_input):
         return self.net(o_input)
-
